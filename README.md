@@ -1,0 +1,3 @@
+It is reported that majority of road accidents are due to ignorance or simple negligence, e.g.,gemeza, lack of lane discipline and stopping at stop signs and traffic lights. These rules are not generally exciting or fun to learn “in theory.”
+
+In this paper, we discuss about a simple 2D top down car driving game which is built using C++ and Raylib where the player learns basic traffic rules by playing different levels. The game has multiple levels, corresponding to each traffic rule; the player will fail if they break any of the rules. The application plans to incorporate learning with interactive gaming in an easy manner that is approachable for Programming Fundamentals students.
