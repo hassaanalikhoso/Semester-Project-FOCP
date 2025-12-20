@@ -1,0 +1,152 @@
+#include <raylib.h>
+#include <cmath>
+
+int main()
+{
+    //                          INITIAL VALUES 
+    float carX = 1070;
+    float carY = 1070;
+    float carAngle = 270;
+    float speed = 0.5f;
+    float revspeed = speed / 4;
+    float scale = 0.5f;
+
+    Color green = { 20, 160, 133, 255 };
+
+    //                           WINDOW & AUDIO 
+    InitWindow(1920, 1080, "First Raylib Game");
+    InitAudioDevice();                 
+    SetTargetFPS(60);
+
+    //                           LOAD ASSETS 
+    Texture2D background = LoadTexture("mapstop.jpeg");
+    Texture2D car = LoadTexture("Car.png");
+
+    Sound driveSound = LoadSound("DriveSound.mp3");
+    SetSoundVolume(driveSound, 1.0f);
+
+    //                          CAR DIMENSIONS
+    float carW = car.width / 20;
+    float carH = car.height / 20;
+    float radius = carW * 0.25f;
+
+    //                          COLLISION RECTANGLES 
+    Rectangle offRec1 = { 0, 500, 910, 660 };
+    Rectangle offRec2 = { 0, 107, 2500, 200 };
+    Rectangle offRec3 = { 1120, 500, 7000, 2000 };
+
+    //                            GAME LOOP 
+    while (!WindowShouldClose())
+    {
+        //                        Direction Vector
+        Vector2 forward;
+        forward.x = cosf(carAngle * DEG2RAD);
+        forward.y = sinf(carAngle * DEG2RAD);
+
+        //                       Collision Circles 
+        Vector2 frontCircle = {
+            carX + forward.x * (carH * 0.55f),
+            carY + forward.y * (carH * 0.55f)
+        };
+
+        Vector2 rearCircle = {
+            carX - forward.x * (carH * 0.55f),
+            carY - forward.y * (carH * 0.55f)
+        };
+
+        bool frontcoll =
+            CheckCollisionCircleRec(frontCircle, radius, offRec1) ||
+            CheckCollisionCircleRec(frontCircle, radius, offRec2) ||
+            CheckCollisionCircleRec(frontCircle, radius, offRec3);
+
+        bool rearcoll =
+            CheckCollisionCircleRec(rearCircle, radius, offRec1) ||
+            CheckCollisionCircleRec(rearCircle, radius, offRec2) ||
+            CheckCollisionCircleRec(rearCircle, radius, offRec3);
+
+        //                       MOVEMENT 
+        if (!frontcoll && !rearcoll)
+        {
+            if (speed > 0.6f)
+            {
+                if (IsKeyDown(KEY_RIGHT)) carAngle += 0.7f;
+                if (IsKeyDown(KEY_LEFT))  carAngle -= 0.7f;
+            }
+
+            if (revspeed > 0.15f)
+            {
+                if (IsKeyDown(KEY_RIGHT)) carAngle -= 0.3f;
+                if (IsKeyDown(KEY_LEFT))  carAngle += 0.3f;
+            }
+
+            // Coast
+            carX += (speed - 0.5f - revspeed + 0.125f) * forward.x;
+            carY += (speed - 0.5f - revspeed + 0.125f) * forward.y;
+
+            // Friction
+            if (speed > 0.5f && IsKeyUp(KEY_UP)) speed *= 0.985f;
+            if (revspeed > 0.125f && IsKeyUp(KEY_DOWN)) revspeed *= 0.985f;
+
+            // Forward
+            if (IsKeyDown(KEY_UP))
+            {
+                if (!IsSoundPlaying(driveSound))
+                    PlaySound(driveSound);
+
+                carX += speed * forward.x;
+                carY += speed * forward.y;
+
+                if (speed < 3.0f) speed *= 1.01f;
+            }
+            else
+            {
+                StopSound(driveSound);
+            }
+
+            // Reverse
+            if (IsKeyDown(KEY_DOWN))
+            {
+                carX -= revspeed * forward.x;
+                carY -= revspeed * forward.y;
+
+                if (revspeed < 1.0f) revspeed *= 1.01f;
+            }
+        }
+        else if (frontcoll)
+        {
+            carX -= forward.x * (carH * 0.02f);
+            carY -= forward.y * (carH * 0.02f);
+            speed = 0.5f;
+            revspeed = 0.125f;
+        }
+        else if (rearcoll)
+        {
+            carX += forward.x * (carH * 0.02f);
+            carY += forward.y * (carH * 0.02f);
+            speed = 0.5f;
+            revspeed = 0.125f;
+        }
+
+        //                         DRAWING 
+        BeginDrawing();
+        ClearBackground(green);
+
+        DrawTextureEx(background, { 0, 0 }, 0, 1.3f, WHITE);
+
+        Rectangle src = { 0, 0, (float)car.width, (float)car.height };
+        Rectangle dst = { carX, carY, carW, carH };
+        Vector2 origin = { carW * scale, carH * scale };
+
+        DrawTexturePro(car, src, dst, origin, carAngle, WHITE);
+        EndDrawing();
+    }
+
+    //                              CLEANUP 
+    UnloadSound(driveSound);
+    UnloadTexture(car);
+    UnloadTexture(background);
+    CloseAudioDevice();
+    CloseWindow();
+
+    return 0;
+}
