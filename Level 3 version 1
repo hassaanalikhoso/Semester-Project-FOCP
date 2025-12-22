@@ -3,7 +3,7 @@
 
 int main()
 {
-    //                          INITIAL VALUES 
+    // -------------------- INITIAL VALUES --------------------
     float carX = 1070;
     float carY = 1070;
     float carAngle = 270;
@@ -13,37 +13,37 @@ int main()
 
     Color green = { 20, 160, 133, 255 };
 
-    //                           WINDOW & AUDIO 
+    // -------------------- WINDOW & AUDIO --------------------
     InitWindow(1920, 1080, "First Raylib Game");
-    InitAudioDevice();                 
+    InitAudioDevice();                 // MUST be before LoadSound
     SetTargetFPS(60);
 
-    //                           LOAD ASSETS 
+    // -------------------- LOAD ASSETS --------------------
     Texture2D background = LoadTexture("mapstop.jpeg");
     Texture2D car = LoadTexture("Car.png");
 
     Sound driveSound = LoadSound("DriveSound.mp3");
     SetSoundVolume(driveSound, 1.0f);
 
-    //                          CAR DIMENSIONS
+    // -------------------- CAR DIMENSIONS --------------------
     float carW = car.width / 20;
     float carH = car.height / 20;
     float radius = carW * 0.25f;
 
-    //                          COLLISION RECTANGLES 
+    // -------------------- COLLISION RECTANGLES --------------------
     Rectangle offRec1 = { 0, 500, 910, 660 };
     Rectangle offRec2 = { 0, 107, 2500, 200 };
     Rectangle offRec3 = { 1120, 500, 7000, 2000 };
 
-    //                            GAME LOOP 
+    // -------------------- GAME LOOP --------------------
     while (!WindowShouldClose())
     {
-        //                        Direction Vector
+        // -------- Direction Vector --------
         Vector2 forward;
         forward.x = cosf(carAngle * DEG2RAD);
         forward.y = sinf(carAngle * DEG2RAD);
 
-        //                       Collision Circles 
+        // -------- Collision Circles --------
         Vector2 frontCircle = {
             carX + forward.x * (carH * 0.55f),
             carY + forward.y * (carH * 0.55f)
@@ -64,7 +64,7 @@ int main()
             CheckCollisionCircleRec(rearCircle, radius, offRec2) ||
             CheckCollisionCircleRec(rearCircle, radius, offRec3);
 
-        //                       MOVEMENT 
+        // -------------------- MOVEMENT --------------------
         if (!frontcoll && !rearcoll)
         {
             if (speed > 0.6f)
@@ -127,7 +127,7 @@ int main()
             revspeed = 0.125f;
         }
 
-        //                         DRAWING 
+        // -------------------- DRAWING --------------------
         BeginDrawing();
         ClearBackground(green);
 
@@ -141,7 +141,7 @@ int main()
         EndDrawing();
     }
 
-    //                              CLEANUP 
+    // -------------------- CLEANUP --------------------
     UnloadSound(driveSound);
     UnloadTexture(car);
     UnloadTexture(background);
